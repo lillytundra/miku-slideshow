@@ -1,4 +1,4 @@
-// list of miku images
+// list of Miku images
 const images = [
     'images/miku1.jpg',   
     'images/miku2.jpg',
@@ -25,17 +25,16 @@ body.style.backgroundImage = `url('${images[current]}')`;
 // function to update background and play music
 function updateBackground() {
     body.style.backgroundImage = `url('${images[current]}')`;
-    if (music.paused) {
-        music.play();
-    }
 }
 
-// flag to check if fullscreen has been activated
-let fullscreenActivated = false;
+// flag to check if the first click has been made
+let firstClick = false;
 
-// request fullscreen on first click
-function goFullscreen() {
+// request fullscreen and play music on the first click
+function goFullscreenAndPlayMusic() {
     const elem = document.documentElement;
+    
+    // Request fullscreen
     if (elem.requestFullscreen) {
         elem.requestFullscreen();
     } else if (elem.webkitRequestFullscreen) { // Safari
@@ -43,17 +42,21 @@ function goFullscreen() {
     } else if (elem.msRequestFullscreen) { // IE11
         elem.msRequestFullscreen();
     }
-    fullscreenActivated = true;
-    document.removeEventListener('click', goFullscreen); // only once
+
+    // Start music
+    music.play();
+
+    firstClick = true;
+    document.removeEventListener('click', goFullscreenAndPlayMusic); // Only do this once
 }
 
-// click: first click activates fullscreen, second click changes the image
+// first click: trigger fullscreen + play music, subsequent clicks: change image
 body.addEventListener('click', () => {
-    if (!fullscreenActivated) {
-        goFullscreen(); // Trigger fullscreen on the first click
+    if (!firstClick) {
+        goFullscreenAndPlayMusic(); // First click: fullscreen + music
     } else {
         current = (current + 1) % images.length;
-        updateBackground(); // Change image and play music on subsequent clicks
+        updateBackground(); // Subsequent clicks: change image
     }
 });
 
@@ -64,7 +67,7 @@ document.addEventListener('keydown', (event) => {
     } else if (event.key === 'ArrowLeft') {
         current = (current - 1 + images.length) % images.length;
     } else {
-        return;
+        return; // Exit if not arrow key
     }
-    updateBackground();
+    updateBackground(); // Update background with new image
 });
